@@ -95,7 +95,7 @@ const accessoriesPaymentSuccess = async (req, res) => {
 
   if (result.modifiedCount > 0) {
     res.redirect(
-      `http://localhost:5173/gym/payment/accessories/success/${req?.params?.trnID}`
+      `https://gym-backend-zeta.vercel.app/gym/payment/accessories/success/${req?.params?.trnID}`
     );
   }
 };
@@ -113,7 +113,7 @@ const accessoriesPaymentFail = async (req, res) => {
 
   if (result.modifiedCount > 0) {
     res.redirect(
-      `http://localhost:5173/gym/payment/fail/${req?.params?.trnID}`
+      `https://gym-backend-zeta.vercel.app/gym/payment/fail/${req?.params?.trnID}`
     );
   }
 };
