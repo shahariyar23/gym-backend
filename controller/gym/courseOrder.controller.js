@@ -26,10 +26,10 @@ const createCourseOrder = async (req, res) => {
     total_amount: totalAmount,
     currency: "BDT",
     tran_id: id, // use unique tran_id for each api call
-    success_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/success/${id}`,
-    fail_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/fail/${id}`,
-    cancel_url: "http://localhost:5173/gym/payment/cancel",
-    ipn_url: "http://localhost:3030/ipn",
+    success_url: `https://gym-frontend-zeta.vercel.app/gym/account`,
+    fail_url: `https://gym-frontend-zeta.vercel.app/gym/account`,
+    cancel_url: "https://gym-frontend-zeta.vercel.app/gym/account",
+    ipn_url: "https://gym-frontend-zeta.vercel.app/gym/account",
     shipping_method: "Courier",
     product_name: course?.title,
     product_category: "Electronic",
@@ -93,7 +93,7 @@ const coursePaymentSuccess = async (req, res) => {
 
   if (result.modifiedCount > 0) {
     res.redirect(
-      `http://localhost:5173/gym/payment/success/${req?.params?.trnID}`
+      `https://gym-frontend-zeta.vercel.app/gym/account`
     );
   }
 };
@@ -111,7 +111,7 @@ const coursePaymentFail = async (req, res) => {
 
   if (result.modifiedCount > 0) {
     res.redirect(
-      `http://localhost:5173/gym/payment/fail/${req?.params?.trnID}`
+      `https://gym-frontend-zeta.vercel.app/gym/account`
     );
   }
 };
