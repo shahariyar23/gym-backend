@@ -18,10 +18,15 @@ const gymCourseOrderRoute = require("./routes/gym/courseOrder.route.js");
 const gymReviewRoute = require("./routes/gym/reviewRoute.js");
 const gymSearchRoute = require("./routes/gym/searchRoute.js");
 
-mongoose
-  .connect(process.env.REACT_APP_MONGODB_URI)
-  .then((res) => console.log("mongodb connected: "))
-  .catch((e) => console.log(e));
+
+mongoose.connect(process.env.REACT_APP_MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then((res) => console.log("mongodb connected: "))
+.catch((e) => console.log(e))
+;
+
 
 const app = express();
 const PORT = process.env.REACT_APP_PORT || 5000;
