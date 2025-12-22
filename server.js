@@ -19,17 +19,26 @@ const gymReviewRoute = require("./routes/gym/reviewRoute.js");
 const gymSearchRoute = require("./routes/gym/searchRoute.js");
 
 
-mongoose.connect(process.env.REACT_APP_MONGODB_URI, {
+// MongoDB Connection with serverless optimization
+const mongoUri = process.env.REACT_APP_MONGODB_URI;
+
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  maxPoolSize: 10,
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
+  maxPoolSize: 5,
+  minPoolSize: 2,
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 60000,
   retryWrites: true,
+  // Serverless specific settings
+  maxIdleTimeMS: 45000,
+  waitQueueTimeoutMS: 30000,
 })
-.then((res) => console.log("mongodb connected"))
-.catch((e) => console.log("MongoDB connection error:", e))
-;
+.then((res) => console.log("✅ MongoDB connected (Serverless optimized)"))
+.catch((e) => {
+  console.error("❌ MongoDB connection error:", e.message);
+  process.exit(1);
+});
 
 
 const app = express();
