@@ -37,7 +37,7 @@ const fetchFilterCourse = async (req, res) => {
         break;
     }
 
-    const courses = await Course.find(filter).sort(sort);
+    const courses = await Course.find(filter).sort(sort).limit(100);
     res.status(200).json({
       success: true,
       courses,
@@ -52,7 +52,7 @@ const fetchFilterCourse = async (req, res) => {
 
 const fetchHomePage = async (req, res) => {
   try {
-    const courses = await Course.find().sort("updatedAt=1").limit(5);
+    const courses = await Course.find().sort({ updatedAt: -1 }).limit(5);
     res.status(200).json({
       success: true,
       data: courses,
