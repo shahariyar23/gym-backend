@@ -21,10 +21,14 @@ const gymSearchRoute = require("./routes/gym/searchRoute.js");
 
 mongoose.connect(process.env.REACT_APP_MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  retryWrites: true,
 })
-.then((res) => console.log("mongodb connected: ", res.Aggregate))
-.catch((e) => console.log(e))
+.then((res) => console.log("mongodb connected"))
+.catch((e) => console.log("MongoDB connection error:", e))
 ;
 
 
