@@ -1,7 +1,10 @@
 const Course = require("../../model/course.model.js");
 
 const fetchFilterCourse = async (req, res) => {
-  const { Category = [], Type = [], sortBy } = req.query;
+  const { Category = [], Type = [], sortBy, page = 1 } = req.query;
+  const limit = 20;
+  const skip = (parseInt(page) - 1) * limit;
+  
   try {
     let filter = {};
     if (Category.length) {
@@ -37,10 +40,15 @@ const fetchFilterCourse = async (req, res) => {
         break;
     }
 
-    const courses = await Course.find(filter).sort(sort).limit(100);
+    const courses = await Course.find(filter).sort(sort).skip(skip).limit(limit);
+    const totalCount = await Course.countDocuments(filter);
+    
     res.status(200).json({
       success: true,
       courses,
+      totalCount,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalCount / limit),
     });
   } catch (error) {
     res.status(500).json({
