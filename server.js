@@ -23,17 +23,17 @@ mongoose.connect(process.env.REACT_APP_MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then((res) => console.log("mongodb connected: "))
+.then((res) => console.log("mongodb connected: ", res.Aggregate))
 .catch((e) => console.log(e))
 ;
 
 
 const app = express();
-const PORT = process.env.REACT_APP_PORT || 5000;
+const PORT = process.env.REACT_APP_PORT || 8000;
 
 app.use(
   cors({
-    origin: "https://gym-frontend-zeta.vercel.app",
+    origin: ["https://gym-frontend-zeta.vercel.app", "http://localhost:5173", "http://localhost:3000"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
@@ -61,5 +61,14 @@ app.use("/api/gym/accessories/order", gymAccessoriesOrderRoute);
 app.use("/api/gym/course/order", gymCourseOrderRoute);
 app.use("/api/gym/review", gymReviewRoute);
 app.use("/api/search", gymSearchRoute);
+
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "Server is running",
+    timestamp: new Date(),
+    port: PORT 
+  });
+});
 
 app.listen(PORT, () => console.log(`Server is running ${PORT}`));

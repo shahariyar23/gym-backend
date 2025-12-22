@@ -89,7 +89,9 @@ const login = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: true, // Set to true on Vercel (production)
+        sameSite: "None", // Use 'None' for cross-site in production, 'Lax' locally
+        maxAge: 24 * 60 * 60 * 1000,
       })
       .json({
         success: true,

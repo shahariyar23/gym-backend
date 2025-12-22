@@ -1,14 +1,14 @@
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("./cloudinary");
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "./cloudinary.js";
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "course", // optional, specify the folder in Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg"],
+    folder: "messFinder", 
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
   },
 });
 
 const parser = multer({ storage: storage }).single("course");
-module.exports = parser;
+export default parser;

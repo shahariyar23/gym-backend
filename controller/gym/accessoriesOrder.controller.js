@@ -26,8 +26,8 @@ const createAccessoriesOrder = async (req, res) => {
     total_amount: totalAmount,
     currency: "BDT",
     tran_id: id, // use unique tran_id for each api call
-    success_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/success/${id}`,
-    fail_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/fail/${id}`,
+    success_url: `http://localhost:8000/api/gym/accessories/order/payment/success/${id}`,
+    fail_url: `http://localhost:8000/api/gym/accessories/order/payment/fail/${id}`,
     cancel_url: "http://localhost:5173/gym/payment/cancel",
     ipn_url: "http://localhost:3030/ipn",
     shipping_method: "Courier",
