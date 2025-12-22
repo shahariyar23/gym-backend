@@ -33,8 +33,8 @@ const PORT = process.env.REACT_APP_PORT || 8000;
 
 app.use(
   cors({
-    origin: ["https://gym-frontend-zeta.vercel.app", "http://localhost:5173", "http://localhost:3000"],
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    origin: ["https://gym-frontend-zeta.vercel.app", "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"],
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",
