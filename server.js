@@ -62,6 +62,11 @@ app.use("/api/gym/course/order", gymCourseOrderRoute);
 app.use("/api/gym/review", gymReviewRoute);
 app.use("/api/search", gymSearchRoute);
 
+// Welcome page
+app.get("/", (req, res) => {
+  res.status(200).send("<h1>Welcome to Our Gym</h1>");
+});
+
 // Health check route
 app.get("/health", (req, res) => {
   res.status(200).json({ 
