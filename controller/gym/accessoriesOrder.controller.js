@@ -93,9 +93,20 @@ const accessoriesPaymentSuccess = async (req, res) => {
 
     if (!order) {
       console.error("Order not found for trnID:", trnID);
-      return res.redirect(
-        `https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Order not found`
-      );
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Error</title>
+          <script>
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Order not found';
+          </script>
+        </head>
+        <body>
+          <p>Redirecting...</p>
+        </body>
+        </html>
+      `);
     }
 
     console.log("Order found:", order._id);
