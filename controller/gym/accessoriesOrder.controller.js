@@ -123,22 +123,56 @@ const accessoriesPaymentSuccess = async (req, res) => {
         }
       } catch (stockError) {
         console.error("Error updating stock:", stockError.message);
-        // Continue with redirect even if stock update fails
+        // Continue even if stock update fails
       }
 
-      return res.redirect(
-        `https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}`
-      );
+      // Send HTML page that will redirect with query params
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Processing</title>
+          <script>
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}';
+          </script>
+        </head>
+        <body>
+          <p>Redirecting...</p>
+        </body>
+        </html>
+      `);
     } else {
-      return res.redirect(
-        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
-      );
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Error</title>
+          <script>
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+          </script>
+        </head>
+        <body>
+          <p>Redirecting...</p>
+        </body>
+        </html>
+      `);
     }
   } catch (error) {
     console.error("Accessories payment success error:", error.message);
-    return res.redirect(
-      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
-    );
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Error</title>
+        <script>
+          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+        </script>
+      </head>
+      <body>
+        <p>Redirecting...</p>
+      </body>
+      </html>
+    `);
   }
 };
 const accessoriesPaymentFail = async (req, res) => {
@@ -155,19 +189,52 @@ const accessoriesPaymentFail = async (req, res) => {
     );
 
     if (result.modifiedCount > 0) {
-      return res.redirect(
-        `https://gym-frontend-zeta.vercel.app/gym/account?status=failed&trnID=${req?.params?.trnID}`
-      );
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Failed</title>
+          <script>
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=failed&trnID=${req?.params?.trnID}';
+          </script>
+        </head>
+        <body>
+          <p>Redirecting...</p>
+        </body>
+        </html>
+      `);
     } else {
-      return res.redirect(
-        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
-      );
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Error</title>
+          <script>
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+          </script>
+        </head>
+        <body>
+          <p>Redirecting...</p>
+        </body>
+        </html>
+      `);
     }
   } catch (error) {
     console.error("Accessories payment fail error:", error.message);
-    return res.redirect(
-      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
-    );
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Error</title>
+        <script>
+          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+        </script>
+      </head>
+      <body>
+        <p>Redirecting...</p>
+      </body>
+      </html>
+    `);
   }
 };
 
