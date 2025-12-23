@@ -83,21 +83,27 @@ const createAccessoriesOrder = async (req, res) => {
 
 const accessoriesPaymentSuccess = async (req, res) => {
   try {
+    const trnID = req?.params?.trnID;
+    console.log("Processing payment success for trnID:", trnID);
+
     // Find the order by payment ID
     const order = await accessoriesOrderSchema.findOne({
-      paymentId: req?.params?.trnID,
+      paymentId: trnID,
     });
 
     if (!order) {
+      console.error("Order not found for trnID:", trnID);
       return res.redirect(
         `https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Order not found`
       );
     }
 
+    console.log("Order found:", order._id);
+
     // Update payment status
     const result = await accessoriesOrderSchema.updateOne(
       {
-        paymentId: req?.params?.trnID,
+        paymentId: trnID,
       },
       {
         $set: {
@@ -108,24 +114,45 @@ const accessoriesPaymentSuccess = async (req, res) => {
     );
 
     if (result.modifiedCount > 0) {
+      console.log("Order status updated");
+      
       // Update accessories stock and clear cart
       try {
-        for (let item of order.cartItems) {
-          let accessories = await Accessories.findById(item?.accessoriesId);
-          if (accessories) {
-            accessories.totalStock -= item.quantity;
-            await accessories.save();
+        if (order.cartItems && Array.isArray(order.cartItems)) {
+          for (let item of order.cartItems) {
+            try {
+              console.log("Updating stock for accessoriesId:", item?.accessoriesId);
+              
+              // Handle both string and ObjectId
+              const accessoriesId = item?.accessoriesId?.toString ? item?.accessoriesId?.toString() : item?.accessoriesId;
+              
+              let accessories = await Accessories.findById(accessoriesId);
+              if (accessories) {
+                const quantityToReduce = parseInt(item.quantity) || 0;
+                accessories.totalStock = Math.max(0, accessories.totalStock - quantityToReduce);
+                await accessories.save();
+                console.log("Stock updated for:", item?.title, "new stock:", accessories.totalStock);
+              } else {
+                console.warn("Accessories not found:", accessoriesId);
+              }
+            } catch (itemError) {
+              console.error("Error updating stock for item:", item?.accessoriesId, itemError.message);
+            }
           }
         }
+        
         // Clear the cart
         if (order.cartId) {
           await Cart.findByIdAndDelete(order.cartId);
+          console.log("Cart cleared");
         }
       } catch (stockError) {
         console.error("Error updating stock:", stockError.message);
         // Continue even if stock update fails
       }
 
+      console.log("Redirecting to success page");
+      
       // Send HTML page that will redirect with query params
       res.status(200).send(`
         <!DOCTYPE html>
@@ -133,7 +160,7 @@ const accessoriesPaymentSuccess = async (req, res) => {
         <head>
           <title>Payment Processing</title>
           <script>
-            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}';
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${trnID}';
           </script>
         </head>
         <body>
@@ -142,13 +169,14 @@ const accessoriesPaymentSuccess = async (req, res) => {
         </html>
       `);
     } else {
+      console.warn("Order was not modified - may already be processed");
       res.status(200).send(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Payment Error</title>
+          <title>Payment Processed</title>
           <script>
-            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${trnID}';
           </script>
         </head>
         <body>
@@ -158,14 +186,18 @@ const accessoriesPaymentSuccess = async (req, res) => {
       `);
     }
   } catch (error) {
-    console.error("Accessories payment success error:", error.message);
+    console.error("Accessories payment success error:", {
+      message: error.message,
+      stack: error.stack,
+      trnID: req?.params?.trnID,
+    });
     res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>Payment Error</title>
         <script>
-          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Processing failed';
         </script>
       </head>
       <body>

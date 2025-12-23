@@ -80,9 +80,12 @@ const createCourseOrder = async (req, res) => {
 
 const coursePaymentSuccess = async (req, res) => {
   try {
+    const trnID = req?.params?.trnID;
+    console.log("Processing course payment success for trnID:", trnID);
+
     const result = await courseOrder.updateOne(
       {
-        paymentId: req?.params?.trnID,
+        paymentId: trnID,
       },
       {
         $set: {
@@ -91,9 +94,11 @@ const coursePaymentSuccess = async (req, res) => {
         },
       }
     );
-    console.log(result, "result for success course");
+    
+    console.log("Course order update result:", { modifiedCount: result.modifiedCount, trnID });
 
     if (result.modifiedCount > 0) {
+      console.log("Course payment status updated successfully");
       // Send HTML page that will redirect with query params
       res.status(200).send(`
         <!DOCTYPE html>
@@ -101,7 +106,7 @@ const coursePaymentSuccess = async (req, res) => {
         <head>
           <title>Payment Processing</title>
           <script>
-            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}';
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${trnID}';
           </script>
         </head>
         <body>
@@ -110,13 +115,14 @@ const coursePaymentSuccess = async (req, res) => {
         </html>
       `);
     } else {
+      console.warn("Course order was not modified - may already be processed");
       res.status(200).send(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Payment Error</title>
+          <title>Payment Processed</title>
           <script>
-            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+            window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${trnID}';
           </script>
         </head>
         <body>
@@ -126,14 +132,18 @@ const coursePaymentSuccess = async (req, res) => {
       `);
     }
   } catch (error) {
-    console.error("Payment success error:", error.message);
+    console.error("Course payment success error:", {
+      message: error.message,
+      stack: error.stack,
+      trnID: req?.params?.trnID,
+    });
     res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>Payment Error</title>
         <script>
-          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error';
+          window.location.href = 'https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Processing failed';
         </script>
       </head>
       <body>
