@@ -26,10 +26,10 @@ const createCourseOrder = async (req, res) => {
     total_amount: totalAmount,
     currency: "BDT",
     tran_id: id, // use unique tran_id for each api call
-    success_url: `https://gym-frontend-zeta.vercel.app/gym/account`,
-    fail_url: `https://gym-frontend-zeta.vercel.app/gym/account`,
-    cancel_url: "https://gym-frontend-zeta.vercel.app/gym/account",
-    ipn_url: "https://gym-frontend-zeta.vercel.app/gym/account",
+    success_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/success/${id}`,
+    fail_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/fail/${id}`,
+    cancel_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/cancel/${id}`,
+    ipn_url: `https://gym-backend-zeta.vercel.app/api/gym/course/order/payment/ipn`,
     shipping_method: "Courier",
     product_name: course?.title,
     product_category: "Electronic",
@@ -79,39 +79,61 @@ const createCourseOrder = async (req, res) => {
 };
 
 const coursePaymentSuccess = async (req, res) => {
-  const result = await courseOrder.updateOne(
-    {
-      paymentId: req?.params?.trnID,
-    },
-    {
-      $set: {
-        paymentStatus: "Paid",
+  try {
+    const result = await courseOrder.updateOne(
+      {
+        paymentId: req?.params?.trnID,
       },
-    }
-  );
-  console.log(result, "result for success course");
+      {
+        $set: {
+          paymentStatus: "Paid",
+        },
+      }
+    );
+    console.log(result, "result for success course");
 
-  if (result.modifiedCount > 0) {
-    res.redirect(
-      `https://gym-frontend-zeta.vercel.app/gym/account`
+    if (result.modifiedCount > 0) {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}`
+      );
+    } else {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
+      );
+    }
+  } catch (error) {
+    console.error("Payment success error:", error.message);
+    return res.redirect(
+      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
     );
   }
 };
 const coursePaymentFail = async (req, res) => {
-  const result = await courseOrder.updateOne(
-    {
-      paymentId: req?.params?.trnID,
-    },
-    {
-      $set: {
-        paymentStatus: "Payment Fail",
+  try {
+    const result = await courseOrder.updateOne(
+      {
+        paymentId: req?.params?.trnID,
       },
-    }
-  );
+      {
+        $set: {
+          paymentStatus: "Payment Failed",
+        },
+      }
+    );
 
-  if (result.modifiedCount > 0) {
-    res.redirect(
-      `https://gym-frontend-zeta.vercel.app/gym/account`
+    if (result.modifiedCount > 0) {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=failed&trnID=${req?.params?.trnID}`
+      );
+    } else {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
+      );
+    }
+  } catch (error) {
+    console.error("Payment fail error:", error.message);
+    return res.redirect(
+      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
     );
   }
 };

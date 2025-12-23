@@ -13,8 +13,8 @@ const router = express.Router();
 router.get("/list/:userId", getAllAccessoriesOrderByUser);
 router.get("/details/:id", getAccessoriesOrderDetails);
 router.post("/payment", createAccessoriesOrder);
-router.post("/payment/success/:trnID", accessoriesPaymentSuccess);
-router.post("/payment/fail/:trnID", accessoriesPaymentFail);
+router.get("/payment/success/:trnID", accessoriesPaymentSuccess);
+router.get("/payment/fail/:trnID", accessoriesPaymentFail);
 router.post("/captureOrder", accessoriesCapturePayment);
 
 module.exports = router;

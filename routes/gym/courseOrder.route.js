@@ -13,8 +13,8 @@ const router = express.Router();
 router.get("/list/:userId", getAllCourseOrderByUser);
 router.get("/details/:id", getCourseOrderDetails);
 router.post("/payment", createCourseOrder);
-router.post("/payment/success/:trnID", coursePaymentSuccess);
-router.post("/payment/fail/:trnID", coursePaymentFail);
+router.get("/payment/success/:trnID", coursePaymentSuccess);
+router.get("/payment/fail/:trnID", coursePaymentFail);
 router.post("/captureOrder", courseCapturePayment);
 
 module.exports = router;

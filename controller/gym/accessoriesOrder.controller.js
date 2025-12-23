@@ -26,10 +26,10 @@ const createAccessoriesOrder = async (req, res) => {
     total_amount: totalAmount,
     currency: "BDT",
     tran_id: id, // use unique tran_id for each api call
-    success_url: `${API_BASE_URL}/api/gym/accessories/order/payment/success/${id}`,
-    fail_url: `${API_BASE_URL}/api/gym/accessories/order/payment/fail/${id}`,
-    cancel_url: "http://localhost:5173/gym/payment/cancel",
-    ipn_url: "http://localhost:3030/ipn",
+    success_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/success/${id}`,
+    fail_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/fail/${id}`,
+    cancel_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/cancel/${id}`,
+    ipn_url: `https://gym-backend-zeta.vercel.app/api/gym/accessories/order/payment/ipn`,
     shipping_method: "Courier",
     product_name: "Computer.",
     product_category: "Electronic",
@@ -82,38 +82,60 @@ const createAccessoriesOrder = async (req, res) => {
 };
 
 const accessoriesPaymentSuccess = async (req, res) => {
-  const result = await accessoriesOrderSchema.updateOne(
-    {
-      paymentId: req?.params?.trnID,
-    },
-    {
-      $set: {
-        paymentStatus: "paid",
+  try {
+    const result = await accessoriesOrderSchema.updateOne(
+      {
+        paymentId: req?.params?.trnID,
       },
-    }
-  );
+      {
+        $set: {
+          paymentStatus: "Paid",
+        },
+      }
+    );
 
-  if (result.modifiedCount > 0) {
-    res.redirect(
-      `https://gym-backend-zeta.vercel.app/gym/payment/accessories/success/${req?.params?.trnID}`
+    if (result.modifiedCount > 0) {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}`
+      );
+    } else {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
+      );
+    }
+  } catch (error) {
+    console.error("Accessories payment success error:", error.message);
+    return res.redirect(
+      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
     );
   }
 };
 const accessoriesPaymentFail = async (req, res) => {
-  const result = await accessoriesOrderSchema.updateOne(
-    {
-      paymentId: req?.params?.trnID,
-    },
-    {
-      $set: {
-        paymentStatus: "fail",
+  try {
+    const result = await accessoriesOrderSchema.updateOne(
+      {
+        paymentId: req?.params?.trnID,
       },
-    }
-  );
+      {
+        $set: {
+          paymentStatus: "Failed",
+        },
+      }
+    );
 
-  if (result.modifiedCount > 0) {
-    res.redirect(
-      `https://gym-backend-zeta.vercel.app/gym/payment/fail/${req?.params?.trnID}`
+    if (result.modifiedCount > 0) {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=failed&trnID=${req?.params?.trnID}`
+      );
+    } else {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
+      );
+    }
+  } catch (error) {
+    console.error("Accessories payment fail error:", error.message);
+    return res.redirect(
+      `https://gym-frontend-zeta.vercel.app/gym/account?status=error`
     );
   }
 };
