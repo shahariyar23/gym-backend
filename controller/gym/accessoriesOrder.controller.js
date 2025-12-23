@@ -83,6 +83,18 @@ const createAccessoriesOrder = async (req, res) => {
 
 const accessoriesPaymentSuccess = async (req, res) => {
   try {
+    // Find the order by payment ID
+    const order = await accessoriesOrderSchema.findOne({
+      paymentId: req?.params?.trnID,
+    });
+
+    if (!order) {
+      return res.redirect(
+        `https://gym-frontend-zeta.vercel.app/gym/account?status=error&message=Order not found`
+      );
+    }
+
+    // Update payment status
     const result = await accessoriesOrderSchema.updateOne(
       {
         paymentId: req?.params?.trnID,
@@ -90,11 +102,30 @@ const accessoriesPaymentSuccess = async (req, res) => {
       {
         $set: {
           paymentStatus: "Paid",
+          orderStatus: "confirmed",
         },
       }
     );
 
     if (result.modifiedCount > 0) {
+      // Update accessories stock and clear cart
+      try {
+        for (let item of order.cartItems) {
+          let accessories = await Accessories.findById(item?.accessoriesId);
+          if (accessories) {
+            accessories.totalStock -= item.quantity;
+            await accessories.save();
+          }
+        }
+        // Clear the cart
+        if (order.cartId) {
+          await Cart.findByIdAndDelete(order.cartId);
+        }
+      } catch (stockError) {
+        console.error("Error updating stock:", stockError.message);
+        // Continue with redirect even if stock update fails
+      }
+
       return res.redirect(
         `https://gym-frontend-zeta.vercel.app/gym/account?status=success&trnID=${req?.params?.trnID}`
       );

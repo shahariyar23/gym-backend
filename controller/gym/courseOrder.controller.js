@@ -87,6 +87,7 @@ const coursePaymentSuccess = async (req, res) => {
       {
         $set: {
           paymentStatus: "Paid",
+          orderStatus: "Confirmed",
         },
       }
     );
