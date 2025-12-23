@@ -18,35 +18,35 @@ async function connectDB() {
     }
 
     console.log("🔄 Creating new MongoDB connection...");
+    console.log("Database Host:", mongoUri.split('@')[1] || 'local');
     
     // Close existing connection if it exists
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
 
-    // Optimized connection settings for serverless
+    // Optimized connection settings for serverless & local
     const connectionOptions = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 5,
-      minPoolSize: 2,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 30000,
-      connectTimeoutMS: 10000,
-      maxIdleTimeMS: 10000,
+      maxPoolSize: 10,
+      minPoolSize: 1,
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 15000,
+      maxIdleTimeMS: 30000,
       retryWrites: true,
-      autoReconnect: false,
-      heartbeatFrequencyMS: 3000,
-      bufferCommands: false,
-      autoIndex: false,
+      heartbeatFrequencyMS: 5000,
+      bufferCommands: true,
+      autoIndex: true,
+      family: 4, // Use IPv4
     };
 
-    // Add retry logic
-    const maxRetries = 3;
+    // Add retry logic with exponential backoff
+    const maxRetries = 5;
     let lastError = null;
     
     for (let i = 0; i < maxRetries; i++) {
       try {
+        console.log(`📡 Connection attempt ${i + 1}/${maxRetries}...`);
         await mongoose.connect(mongoUri, connectionOptions);
         cachedConnection = mongoose.connection;
         
@@ -60,15 +60,21 @@ async function connectDB() {
           console.log('⚠️ MongoDB disconnected');
           cachedConnection = null;
         });
+
+        mongoose.connection.on('reconnected', () => {
+          console.log('✅ MongoDB reconnected');
+        });
         
         console.log("✅ MongoDB connected successfully");
         return cachedConnection;
       } catch (error) {
         lastError = error;
-        console.log(`⚠️ Connection attempt ${i + 1} failed, retrying...`);
+        console.error(`❌ Attempt ${i + 1} failed:`, error.message);
         
         if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          const delayMs = 2000 * Math.pow(2, i); // Exponential backoff
+          console.log(`⏳ Retrying in ${delayMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
     }
@@ -76,6 +82,7 @@ async function connectDB() {
     throw lastError;
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
+    console.error("Error details:", error);
     cachedConnection = null;
     throw error;
   }
