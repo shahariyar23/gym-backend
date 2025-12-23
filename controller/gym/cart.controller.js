@@ -47,11 +47,25 @@ const addToCart = async (req, res) => {
 
     // Save the cart
     await cart.save();
-    // console.log(cart);
+    
+    // Populate accessories details for response
+    let populatedCart = await Cart.findById(cart._id).populate({
+      path: "items.accessoriesId",
+      select: "image title price offerPrice",
+    });
+
+    const cartItems = populatedCart.items.map((item) => ({
+      accessoriesId: item.accessoriesId._id,
+      image: item.accessoriesId.image,
+      title: item.accessoriesId.title,
+      price: item.accessoriesId.price,
+      offerPrice: item.accessoriesId.offerPrice,
+      quantity: item.quantity,
+    }));
 
     res.status(201).json({
       success: true,
-      cart,
+      cart: cartItems,
     });
   } catch (error) {
     res.status(500).json({
@@ -151,7 +165,7 @@ const updateToCart = async (req, res) => {
         ? item.accessoriesId.title
         : "Product not found",
       price: item.accessoriesId ? item.accessoriesId.price : null,
-      offerPrice: item.accessoriesId ? item.accessoriesId.offerPrice : nulll,
+      offerPrice: item.accessoriesId ? item.accessoriesId.offerPrice : null,
       quantity: item.quantity,
     }));
     res.status(200).json({
